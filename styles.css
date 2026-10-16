@@ -1835,7 +1835,7 @@ h1 {
   .map-toolbar h2 { font-size: 25px; }
   .map-toolbar .map-intro { font-size: 13px; }
   .map-card { padding: 0; }
-  .map-sidebar { display: flex; }
+  .map-sidebar { display: flex; align-items: stretch; }
   .league-feature { min-height: 270px; padding: 18px; }
   .league-feature h3 { font-size: 18px; }
   .league-feature-count strong { font-size: 72px; }
