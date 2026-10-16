@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>大沩校园案例交互展示</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./league-case.css" />
   </head>
   <body>
     <main class="exhibition-shell" id="app">
@@ -35,20 +36,12 @@
 
         <div class="main-layout">
           <section class="map-stage" aria-label="中国地图案例选择">
+            <div class="map-toolbar">
+              <p class="map-eyebrow">CHINA CAMPUS MAP</p>
+              <h2>让AI公益，点亮每一座校园</h2>
+              <p class="map-intro">点击地图，探索全国校园实践</p>
+            </div>
             <div class="map-card">
-              <div class="map-toolbar">
-                <span>CHINA CAMPUS MAP</span>
-                <button
-                  class="league-toggle"
-                  id="leagueToggle"
-                  type="button"
-                  aria-controls="leaguePanel"
-                  aria-pressed="false"
-                >
-                  <span>01</span>
-                  <strong>跳跃吧·大沩英气少年全国校园AI跳绳公益联赛</strong>
-                </button>
-              </div>
               <div class="map-body" id="mapBody">
                 <div class="china-map" id="mapCanvas">
                   <div class="map-content" id="mapContent">
@@ -65,15 +58,8 @@
                       viewBox="0 0 1000 720"
                       aria-hidden="true"
                     ></svg>
-                    <svg
-                      class="case-marker-guides"
-                      id="caseMarkerGuides"
-                      viewBox="0 0 1000 720"
-                      aria-hidden="true"
-                    ></svg>
                     <div class="league-markers" id="leagueMarkers" aria-label="联赛覆盖省份"></div>
                     <div class="case-pins" id="casePins" aria-label="校园案例位置"></div>
-                    <div class="region-points" id="casePoints" aria-label="校园案例点位"></div>
                   </div>
                   <div class="south-sea-inset" aria-label="南海诸岛附图框">
                     <span>南海诸岛</span>
@@ -94,8 +80,8 @@
                     <input
                       id="mapZoom"
                       type="range"
-                      min="1.08"
-                      max="3.18"
+                      min="0.78"
+                      max="4.2"
                       step="0.01"
                       value="1.24"
                       aria-label="调整地图缩放"
@@ -126,11 +112,86 @@
             </div>
           </section>
 
-          <aside class="case-list" aria-label="案例列表">
-            <p class="panel-label">CASE INDEX</p>
-            <div id="caseList"></div>
+          <aside class="map-sidebar" aria-label="全国赛事与案例索引">
+            <section class="league-feature" aria-labelledby="leagueFeatureTitle" data-case-id="league">
+              <div class="league-feature-copy">
+                <span class="league-feature-number">01</span>
+                <h3 id="leagueFeatureTitle">全国校园AI跳绳公益挑战赛</h3>
+                <button class="league-feature-count" id="leagueCountEntry" type="button" aria-controls="leagueScreen" aria-label="探索全国赛事覆盖的23个省份"><strong>23</strong><span>个省份</span></button>
+                <p class="league-feature-description">跳跃吧，大沩英气少年</p>
+              </div>
+              <button class="league-entry" id="leagueToggle" type="button" data-case-id="league" aria-controls="leagueScreen">
+                点亮全国 <span aria-hidden="true">→</span>
+              </button>
+            </section>
+
+            <section class="case-list" aria-label="案例列表">
+              <div class="case-list-heading">
+                <h3><span>CASE INDEX</span> 案例索引</h3>
+                <span>02—10</span>
+              </div>
+              <div id="caseList"></div>
+            </section>
           </aside>
         </div>
+      </section>
+
+      <section class="league-screen" id="leagueScreen" aria-labelledby="leagueScreenTitle" hidden>
+        <header class="league-screen-header">
+          <img src="./assets/images/logo横幅 优化版.png" alt="大沩人工智能标志" />
+          <strong class="league-brand-name">DAWEI</strong>
+          <span aria-hidden="true"></span>
+          <p>公益足迹 <small>全国案例 01</small></p>
+          <button id="leagueBack" class="league-back" type="button">返回案例地图</button>
+        </header>
+
+        <div class="league-screen-main">
+          <section class="league-map-area" aria-label="全国赛事覆盖地图">
+            <div class="league-map-heading">
+              <p>CASE 01 / NATIONAL COVERAGE</p>
+              <h2>让每一次跳跃，点亮更多校园</h2>
+            </div>
+            <div class="league-map-viewport" id="leagueMapViewport">
+              <div class="league-map-transform" id="leagueMapTransform">
+                <svg id="leagueMapSvg" viewBox="0 0 1000 720" role="img" aria-label="全国校园AI跳绳公益挑战赛23个省份覆盖地图"></svg>
+              </div>
+              <div class="league-south-sea" aria-label="南海诸岛附图">
+                <span>南海诸岛</span>
+                <svg id="leagueSouthSeaSvg" viewBox="0 0 180 210" aria-hidden="true"></svg>
+              </div>
+              <div class="league-map-controls" aria-label="地图缩放">
+                <button id="leagueZoomOut" type="button" aria-label="缩小地图" title="缩小地图">−</button>
+                <input id="leagueZoom" type="range" min="0.8" max="3" step="0.05" value="1" aria-label="地图缩放比例" />
+                <button id="leagueZoomIn" type="button" aria-label="放大地图" title="放大地图">+</button>
+              </div>
+            </div>
+          </section>
+
+          <aside class="league-detail" aria-label="全国赛事信息">
+            <div class="league-detail-title">
+              <span>01</span>
+              <h1 id="leagueScreenTitle">全国校园AI跳绳公益挑战赛</h1>
+            </div>
+            <p class="league-detail-description">联赛覆盖 23 个省份，汇集校园跳绳活动与公益赛事成果。</p>
+            <div class="league-detail-count"><strong>23</strong><span>个省份</span></div>
+            <div class="league-video-pending" role="group" aria-label="赛事视频待嵌入">
+              <span class="league-video-play" aria-hidden="true">▶</span>
+              <strong>视频待嵌入</strong>
+              <video id="leagueEventVideo" controls playsinline preload="metadata" hidden></video>
+            </div>
+            <div class="league-provinces-heading">
+              <h2>参与省份</h2><span>23 PROVINCES</span>
+            </div>
+            <div class="league-provinces" id="leagueProvinces" aria-label="23个参与省份"></div>
+          </aside>
+        </div>
+
+        <nav class="league-case-nav" aria-label="01至10案例导航">
+          <div class="league-case-nav-heading"><strong>案例导航</strong><span>CASE INDEX</span></div>
+          <button class="league-nav-arrow" id="leagueNavPrev" type="button" aria-label="向左浏览案例" title="向左浏览案例">‹</button>
+          <div class="league-case-track" id="leagueCaseTrack"></div>
+          <button class="league-nav-arrow" id="leagueNavNext" type="button" aria-label="向右浏览案例" title="向右浏览案例">›</button>
+        </nav>
       </section>
 
       <section class="case-overlay" id="caseOverlay" aria-hidden="true">
@@ -157,5 +218,6 @@
     <script src="./assets/data/cases-real.js"></script>
     <script src="./assets/data/league.js"></script>
     <script src="./script.js"></script>
+    <script src="./league-case.js"></script>
   </body>
 </html>
