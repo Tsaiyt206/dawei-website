@@ -22,7 +22,6 @@ const MAP_VIEWBOX_HEIGHT = 720;
 const MAP_PADDING = 34;
 const MAP_BASE_ZOOM = 1.08 / 1.24;
 const MAP_LEAGUE_BASE_ZOOM = 1 / 1.24;
-const MARKER_SCREEN_SCALE = 0.98;
 const MAP_ZOOM_CLICK_FACTOR = 1.1;
 const GEOMETRY_SIMPLIFY_TOLERANCE = 0.32;
 const LINE_SIMPLIFY_TOLERANCE = 0.18;
@@ -42,6 +41,8 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const caseRegions = new Set(
   window.DAWEI_CASES.flatMap((item) => item.regions || [item.region]),
 );
+const brightDecorRegions = new Set(["黑龙江", "四川", "云南", "广西"]);
+const midDecorRegions = new Set(["甘肃", "湖北", "湖南", "江西", "福建", "海南"]);
 const casesByRegion = new Map();
 window.DAWEI_CASES.forEach((item) => {
   (item.regions || [item.region]).forEach((region) => {
@@ -53,8 +54,6 @@ const leagueCounts = new Map(
 );
 
 const stage = document.querySelector("#stage");
-const pointsRoot = document.querySelector("#casePoints");
-const caseMarkerGuidesRoot = document.querySelector("#caseMarkerGuides");
 const casePinsRoot = document.querySelector("#casePins");
 const leagueMarkerGuidesRoot = document.querySelector("#leagueMarkerGuides");
 const leagueMarkersRoot = document.querySelector("#leagueMarkers");
@@ -158,15 +157,40 @@ function createChinaMapDefs() {
       ["54%", "#f4fbff", "0.96"],
       ["100%", "#eaf6ff", "0.96"],
     ]),
-    createLinearGradient("mapCaseRegionGradient", [
-      ["0%", "#3bc7ed", "0.95"],
-      ["46%", "#2c61d8", "0.91"],
-      ["100%", "#254db6", "0.93"],
+    createLinearGradient("mapDecorRegionGradient", [
+      ["0%", "#f0f9ff"],
+      ["52%", "#d7ecff"],
+      ["100%", "#c1e0f8"],
     ]),
-    createLinearGradient("mapCaseRegionHoverGradient", [
+    createLinearGradient("mapDecorRegionGradientAlt", [
+      ["0%", "#f7fcff"],
+      ["52%", "#e7f4ff"],
+      ["100%", "#d2eafa"],
+    ]),
+    createLinearGradient("mapDecorRegionGradientDeep", [
+      ["0%", "#e8f6ff"],
+      ["52%", "#cbe7fd"],
+      ["100%", "#acd8f5"],
+    ]),
+    createLinearGradient("mapDecorRegionGradientMid", [
+      ["0%", "#d6f4ff"],
+      ["52%", "#a7defb"],
+      ["100%", "#72bfef"],
+    ]),
+    createLinearGradient("mapDecorRegionGradientBright", [
+      ["0%", "#a5ecff"],
+      ["52%", "#64cafa"],
+      ["100%", "#2e9eee"],
+    ]),
+    createLinearGradient("mapCaseRegionGradient", [
       ["0%", "#6af6ff", "0.98"],
       ["46%", "#2f91ff", "0.96"],
       ["100%", "#2769ff", "0.98"],
+    ]),
+    createLinearGradient("mapCaseRegionHoverGradient", [
+      ["0%", "#b8fcff", "0.99"],
+      ["46%", "#77c7ff", "0.98"],
+      ["100%", "#5b9dff", "0.99"],
     ]),
     createLinearGradient("mapExtrudeGlassGradient", [
       ["0%", "#d7ffff", "0.54"],
@@ -324,7 +348,7 @@ function setMapZoom(value) {
   const zoomValue = clamp(Number(value), minZoom, maxZoom);
   const visualZoom =
     zoomValue * (state.leagueActive ? MAP_LEAGUE_BASE_ZOOM : MAP_BASE_ZOOM);
-  const markerScale = MARKER_SCREEN_SCALE / visualZoom;
+  const markerScale = 0.98 / visualZoom;
 
   mapZoom.value = zoomValue.toFixed(2);
   mapContent.style.setProperty("--map-visual-zoom", visualZoom);
@@ -352,7 +376,7 @@ function setMapPan(x, y) {
 function beginMapDrag(event) {
   if (
     event.target.closest(".map-zoom-control") ||
-    event.target.closest(".case-point, .case-pin, .league-marker") ||
+    event.target.closest(".case-pin, .league-marker") ||
     event.button !== 0
   ) {
     return;
@@ -579,26 +603,12 @@ function featureIntersectsBounds(feature, bounds) {
   return intersects;
 }
 
-function setCasePointPosition(button, item) {
-  if (item.geo && geoProjector) {
-    const [x, y] = geoProjector(item.geo);
-    const [offsetX, offsetY] = item.markerOffset || [0, 0];
-    button.style.setProperty("--x", `${((x + offsetX) / MAP_VIEWBOX_WIDTH) * 100}%`);
-    button.style.setProperty("--y", `${((y + offsetY) / MAP_VIEWBOX_HEIGHT) * 100}%`);
-    return;
-  }
-
-  if (regionCenters.has(item.region)) {
-    const [x, y] = regionCenters.get(item.region);
-    button.style.setProperty("--x", `${(x / MAP_VIEWBOX_WIDTH) * 100}%`);
-    button.style.setProperty("--y", `${(y / MAP_VIEWBOX_HEIGHT) * 100}%`);
-  }
-}
-
 function getMapRegionClass(feature, baseClass) {
   const regionName = feature.properties.name || "";
   const classes = [baseClass];
   if (caseRegions.has(regionName)) classes.push("is-case-region");
+  else if (brightDecorRegions.has(regionName)) classes.push("is-decor-bright");
+  else if (midDecorRegions.has(regionName)) classes.push("is-decor-mid");
   if (leagueCounts.has(regionName)) classes.push("is-league-region");
   return classes.join(" ");
 }
@@ -806,77 +816,124 @@ function bindCaseMarkerInteraction(button, item) {
 
 function createCaseButton(item, className) {
   const button = document.createElement("button");
-  const title = document.createElement("strong");
-  const subtitle = document.createElement("span");
+  const thumbnail = document.createElement("img");
+  const copy = document.createElement("span");
+  const heading = document.createElement("span");
+  const number = document.createElement("strong");
+  const location = document.createElement("strong");
+  const school = document.createElement("span");
+  const arrow = document.createElement("span");
 
   button.type = "button";
   button.className = className;
   button.dataset.caseId = item.id;
   button.setAttribute("aria-label", `查看${item.location}：${item.title}`);
 
-  title.textContent = `${item.number} ${item.location}`;
-  subtitle.textContent = item.shortTitle;
-  button.append(title, subtitle);
-
-  if (className === "case-point") {
-    setCasePointPosition(button, item);
-  }
+  thumbnail.className = "case-list-thumbnail";
+  thumbnail.src = `./assets/images/case-thumbnails/${item.id}.jpg`;
+  thumbnail.alt = "";
+  thumbnail.loading = "lazy";
+  copy.className = "case-list-copy";
+  heading.className = "case-list-line";
+  number.className = "case-list-number";
+  number.textContent = item.number;
+  location.className = "case-list-location";
+  location.textContent = item.location;
+  school.className = "case-list-school";
+  school.textContent = item.shortTitle;
+  arrow.className = "case-list-arrow";
+  arrow.textContent = "→";
+  arrow.setAttribute("aria-hidden", "true");
+  heading.append(number, location);
+  copy.append(heading, school);
+  button.append(thumbnail, copy, arrow);
 
   bindCaseMarkerInteraction(button, item);
   return button;
 }
 
-function renderCaseAnchors(item) {
-  if (!geoProjector || !item.geo) return;
+function renderCaseAnchors() {
+  if (!geoProjector) return;
+  const cities = new Map();
 
-  const [baseX, baseY] = geoProjector(item.geo);
-  const [offsetX, offsetY] = item.markerOffset || [0, 0];
-  const anchors = item.mapAnchors || [{ region: item.location, geo: item.geo }];
+  window.DAWEI_CASES.forEach((item) => {
+    const anchors = item.mapAnchors || [{ region: item.location, geo: item.geo }];
+    anchors.forEach(({ region, geo }) => {
+      if (!geo) return;
+      const city = region.split(/[·/]/).at(-1).trim();
+      if (!cities.has(city)) cities.set(city, { points: [], items: [] });
+      const group = cities.get(city);
+      group.points.push(geoProjector(geo));
+      group.items.push(item);
+    });
+  });
 
-  anchors.forEach(({ region, geo, pinAngle = item.pinAngle || 0 }) => {
-    const [x, y] = geoProjector(geo);
-    const guideCoordinates = {
-      x1: x, y1: y,
-      x2: baseX + offsetX, y2: baseY + offsetY,
-      "data-case-id": item.id,
-    };
-    caseMarkerGuidesRoot.append(
-      createSvgElement("line", { ...guideCoordinates, class: "case-guide" }),
-      createSvgElement("circle", {
-        cx: x, cy: y, r: 2,
-        class: "case-pin-anchor",
-        "data-case-id": item.id,
-      }),
-    );
-
-    const pin = document.createElement("button");
-    const icon = createSvgElement("svg", { viewBox: "0 0 24 32", "aria-hidden": "true" });
-    icon.appendChild(createSvgElement("path", {
-      d: "M12 1a10 10 0 0 0-10 10c0 7.8 10 21 10 21s10-13.2 10-21A10 10 0 0 0 12 1Z",
-    }));
-    icon.appendChild(createSvgElement("circle", { cx: 12, cy: 11, r: 3.5 }));
-    pin.type = "button";
+  cities.forEach(({ points, items }, city) => {
+    const [x, y] = points.reduce(
+      ([sumX, sumY], [pointX, pointY]) => [sumX + pointX, sumY + pointY],
+      [0, 0],
+    ).map((sum) => sum / points.length);
+    const pin = document.createElement("div");
+    const trigger = document.createElement("button");
+    const icon = document.createElement("span");
+    const label = document.createElement("span");
     pin.className = "case-pin";
-    pin.dataset.caseId = item.id;
-    pin.setAttribute("aria-label", `查看${region}：${item.title}`);
+    pin.dataset.city = city;
     pin.style.setProperty("--x", `${(x / MAP_VIEWBOX_WIDTH) * 100}%`);
     pin.style.setProperty("--y", `${(y / MAP_VIEWBOX_HEIGHT) * 100}%`);
-    pin.style.setProperty("--pin-angle", `${pinAngle}deg`);
-    pin.appendChild(icon);
-    bindCaseMarkerInteraction(pin, item);
+    trigger.type = "button";
+    trigger.className = "case-pin-trigger";
+    trigger.setAttribute("aria-label", `查看${city}${items.length > 1 ? `的${items.length}个案例` : `：${items[0].title}`}`);
+    icon.className = "case-pin-icon";
+    icon.setAttribute("aria-hidden", "true");
+    label.className = "case-pin-label";
+    label.textContent = items.length > 1 ? `${city} · ${items.length}` : city;
+    trigger.append(icon, label);
+    pin.appendChild(trigger);
+
+    if (items.length > 1) {
+      const menu = document.createElement("div");
+      menu.className = "case-pin-menu";
+      menu.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+      items.forEach((item) => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.dataset.caseId = item.id;
+        option.textContent = `${item.number} ${item.shortTitle}`;
+        option.addEventListener("click", () => openCase(item.id));
+        menu.appendChild(option);
+      });
+      pin.appendChild(menu);
+      trigger.addEventListener("click", () => {
+        const opening = menu.hidden;
+        casePinsRoot.querySelectorAll(".case-pin-menu").forEach((other) => {
+          other.hidden = true;
+          other.previousElementSibling.setAttribute("aria-expanded", "false");
+        });
+        menu.hidden = !opening;
+        trigger.setAttribute("aria-expanded", String(opening));
+      });
+    } else {
+      trigger.addEventListener("click", () => openCase(items[0].id));
+    }
+
+    pin.addEventListener("pointerenter", () => items.forEach((item) => setCaseRegionsActive(item, true)));
+    pin.addEventListener("pointerleave", () => items.forEach((item) => setCaseRegionsActive(item, false)));
+    pin.addEventListener("focusin", () => items.forEach((item) => setCaseRegionsActive(item, true)));
+    pin.addEventListener("focusout", (event) => {
+      if (!pin.contains(event.relatedTarget)) items.forEach((item) => setCaseRegionsActive(item, false));
+    });
     casePinsRoot.appendChild(pin);
   });
 }
 
 function renderCases() {
-  pointsRoot.innerHTML = "";
   listRoot.innerHTML = "";
-  caseMarkerGuidesRoot.replaceChildren();
   casePinsRoot.replaceChildren();
 
+  renderCaseAnchors();
   window.DAWEI_CASES.forEach((item) => {
-    renderCaseAnchors(item);
-    pointsRoot.appendChild(createCaseButton(item, "case-point"));
     listRoot.appendChild(createCaseButton(item, "case-list-item"));
   });
 }
@@ -1026,11 +1083,14 @@ function resetVideo() {
   video.load();
 }
 
-function openCase(id) {
-  const item = id === "league"
-    ? window.DAWEI_LEAGUE_CASE
-    : window.DAWEI_CASES.find((caseItem) => caseItem.id === id);
+function showCaseDetails(id) {
+  const item = window.DAWEI_CASES.find((caseItem) => caseItem.id === id);
   if (!item) return;
+
+  casePinsRoot.querySelectorAll(".case-pin-menu").forEach((menu) => {
+    menu.hidden = true;
+    menu.previousElementSibling.setAttribute("aria-expanded", "false");
+  });
 
   state.activeCaseId = id;
   caseKicker.textContent = `${item.location || item.region} / ${item.kicker}`;
@@ -1054,11 +1114,20 @@ function openCase(id) {
   closeButton.focus();
 }
 
-function closeCase() {
+function hideCaseDetails() {
   state.activeCaseId = null;
   resetVideo();
   overlay.classList.remove("is-open");
   overlay.setAttribute("aria-hidden", "true");
+}
+
+function openCase(id) {
+  if (!window.DAWEI_CASES.some((item) => item.id === id)) return;
+  navigateToCase(id);
+}
+
+function closeCase() {
+  navigateBackFromCase();
 }
 
 closeButton.addEventListener("click", closeCase);
@@ -1072,7 +1141,20 @@ overlay.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && overlay.classList.contains("is-open")) {
     closeCase();
+  } else if (event.key === "Escape") {
+    casePinsRoot.querySelectorAll(".case-pin-menu").forEach((menu) => {
+      menu.hidden = true;
+      menu.previousElementSibling.setAttribute("aria-expanded", "false");
+    });
   }
+});
+
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".case-pin")) return;
+  casePinsRoot.querySelectorAll(".case-pin-menu").forEach((menu) => {
+    menu.hidden = true;
+    menu.previousElementSibling.setAttribute("aria-expanded", "false");
+  });
 });
 
 let coverBlinkPlaying = false;
@@ -1098,11 +1180,7 @@ mapZoom.addEventListener("input", (event) => {
   setMapZoom(event.target.value);
 });
 
-leagueToggle.addEventListener("click", () => {
-  setLeagueMode(!state.leagueActive);
-});
-
-leagueVideoButton.addEventListener("click", () => openCase("league"));
+leagueVideoButton.addEventListener("click", () => navigateToLeague());
 
 mapZoomOut.addEventListener("click", () => {
   stepMapZoom(-1);
