@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>大沩校园案例交互展示</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="exhibition-shell" id="app">
+      <section class="home-screen" id="stage" aria-labelledby="page-title">
+        <div class="hero-row">
+          <header class="topbar" aria-label="大沩人工智能">
+            <div class="logo-lockup">
+              <img src="./assets/images/logo横幅 优化版.png" alt="大沩人工智能 DAWEI AI" />
+            </div>
+          </header>
+          <h1 id="page-title" class="sr-only">全国校园案例交互展示</h1>
+          <video
+            class="cover-blink-video"
+            id="coverBlinkVideo"
+            src="./assets/videos/沩沩眨眼动画.mp4"
+            preload="auto"
+            playsinline
+            muted
+            aria-label="大沩首页封面"
+          ></video>
+          <button
+            class="cover-blink-trigger"
+            id="coverBlinkTrigger"
+            type="button"
+            aria-label="点击封面让沩沩眨眼"
+          ></button>
+        </div>
+
+        <div class="main-layout">
+          <section class="map-stage" aria-label="中国地图案例选择">
+            <div class="map-card">
+              <div class="map-toolbar">
+                <span>CHINA CAMPUS MAP</span>
+                <button
+                  class="league-toggle"
+                  id="leagueToggle"
+                  type="button"
+                  aria-controls="leaguePanel"
+                  aria-pressed="false"
+                >
+                  <span>01</span>
+                  <strong>跳跃吧·大沩英气少年全国校园AI跳绳公益联赛</strong>
+                </button>
+              </div>
+              <div class="map-body" id="mapBody">
+                <div class="china-map" id="mapCanvas">
+                  <div class="map-content" id="mapContent">
+                    <svg
+                      class="china-geo-map"
+                      id="chinaGeoMap"
+                      viewBox="0 0 1000 720"
+                      aria-label="中国地图"
+                      role="img"
+                    ></svg>
+                    <svg
+                      class="league-marker-guides"
+                      id="leagueMarkerGuides"
+                      viewBox="0 0 1000 720"
+                      aria-hidden="true"
+                    ></svg>
+                    <svg
+                      class="case-marker-guides"
+                      id="caseMarkerGuides"
+                      viewBox="0 0 1000 720"
+                      aria-hidden="true"
+                    ></svg>
+                    <div class="league-markers" id="leagueMarkers" aria-label="联赛覆盖省份"></div>
+                    <div class="case-pins" id="casePins" aria-label="校园案例位置"></div>
+                    <div class="region-points" id="casePoints" aria-label="校园案例点位"></div>
+                  </div>
+                  <div class="south-sea-inset" aria-label="南海诸岛附图框">
+                    <span>南海诸岛</span>
+                    <svg
+                      class="south-sea-map"
+                      id="southSeaMap"
+                      viewBox="0 0 180 210"
+                      aria-hidden="true"
+                    ></svg>
+                  </div>
+                  <div class="map-zoom-control" aria-label="地图缩放">
+                    <button
+                      class="zoom-icon zoom-out"
+                      id="mapZoomOut"
+                      type="button"
+                      aria-label="缩小地图 10%"
+                    ></button>
+                    <input
+                      id="mapZoom"
+                      type="range"
+                      min="1.08"
+                      max="3.18"
+                      step="0.01"
+                      value="1.24"
+                      aria-label="调整地图缩放"
+                    />
+                    <button
+                      class="zoom-icon zoom-in"
+                      id="mapZoomIn"
+                      type="button"
+                      aria-label="放大地图 10%"
+                    ></button>
+                  </div>
+                </div>
+                <aside
+                  class="league-panel"
+                  id="leaguePanel"
+                  aria-label="全国校园AI跳绳公益联赛学校分布"
+                  hidden
+                >
+                  <div class="league-panel-heading">
+                    <p>全国校园 AI 跳绳公益联赛</p>
+                    <strong>23 个省份</strong>
+                    <span id="leagueSelection">全国学校分布</span>
+                    <button class="league-video-button" id="leagueVideoButton" type="button">观看联赛视频</button>
+                  </div>
+                  <div class="league-count-list" id="leagueCountList"></div>
+                </aside>
+              </div>
+            </div>
+          </section>
+
+          <aside class="case-list" aria-label="案例列表">
+            <p class="panel-label">CASE INDEX</p>
+            <div id="caseList"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="case-overlay" id="caseOverlay" aria-hidden="true">
+        <div class="case-dialog" role="dialog" aria-modal="true" aria-labelledby="caseTitle">
+          <button class="back-button" type="button" id="closeCase">返回地图</button>
+          <div class="video-panel">
+            <video id="caseVideo" playsinline preload="metadata"></video>
+            <div class="video-placeholder" id="videoPlaceholder">
+              <span>CASE VIDEO</span>
+              <p>案例视频素材接入中，当前保留完整画幅播放区域。</p>
+            </div>
+            <div class="video-caption" id="videoCaption">CASE VIDEO</div>
+          </div>
+          <article class="case-copy">
+            <p class="case-kicker" id="caseKicker">REGION CASE</p>
+            <h2 id="caseTitle">案例标题</h2>
+            <p id="caseDescription">案例说明</p>
+            <dl class="case-facts" id="caseFacts"></dl>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="./assets/data/cases-real.js"></script>
+    <script src="./assets/data/league.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
