@@ -386,9 +386,9 @@ button.league-feature-count:focus-visible {
   border-radius: 50%;
   background: #f7fcff;
   color: #1969bb;
-  font-size: 26px;
   cursor: pointer;
 }
+.league-nav-arrow svg { display: block; width: 18px; height: 18px; }
 .league-case-track { display: flex; gap: 9px; flex: 1; min-width: 0; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: thin; padding: 4px 2px 9px; }
 .league-case-card {
   position: relative;
@@ -451,6 +451,7 @@ button.league-feature-count:focus-visible {
   .league-case-nav-heading { width: 62px; }
   .league-case-nav-heading strong { font-size: 12px; }
   .league-case-nav-heading span { font-size: 9px; }
-  .league-nav-arrow { width: 24px; height: 24px; font-size: 20px; }
+  .league-nav-arrow { width: 24px; height: 24px; }
+  .league-nav-arrow svg { width: 14px; height: 14px; }
   .league-case-card { width: 150px; height: 105px; }
 }
