@@ -1814,18 +1814,36 @@ h1 {
   line-height: 1;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) and (min-width: 901px) {
+  .main-layout {
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    gap: 18px;
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .case-list button.case-list-item {
+    grid-template-columns: 90px minmax(0, 1fr) 26px;
+    gap: 8px;
+  }
+
+  .case-list-thumbnail { width: 90px; }
+  .south-sea-inset { right: 8px; bottom: 12px; width: 100px; height: 118px; }
+  .south-sea-inset span { left: 6px; top: 5px; font-size: 9px; }
+}
+
+@media (max-width: 900px) {
   .main-layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "map" "cases";
   }
 
   .map-sidebar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
+    align-items: stretch;
   }
 
+  .south-sea-inset { right: 8px; bottom: 12px; width: 100px; height: 118px; }
+  .south-sea-inset span { left: 6px; top: 5px; font-size: 9px; }
   .case-list { height: 520px; }
 }
 
@@ -1836,6 +1854,7 @@ h1 {
   .map-toolbar .map-intro { font-size: 13px; }
   .map-card { padding: 0; }
   .map-sidebar { display: flex; align-items: stretch; }
+  .south-sea-inset { left: 8px; right: auto; top: 8px; bottom: auto; width: 76px; height: 90px; }
   .league-feature { min-height: 270px; padding: 18px; }
   .league-feature h3 { font-size: 18px; }
   .league-feature-count strong { font-size: 72px; }
