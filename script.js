@@ -840,7 +840,7 @@ function createCaseButton(item, className) {
   location.className = "case-list-location";
   location.textContent = item.location;
   school.className = "case-list-school";
-  school.textContent = item.shortTitle;
+  school.textContent = item.indexType ? `${item.indexType} · ${item.shortTitle}` : item.shortTitle;
   arrow.className = "case-list-arrow";
   arrow.textContent = "→";
   arrow.setAttribute("aria-hidden", "true");
@@ -933,9 +933,25 @@ function renderCases() {
   casePinsRoot.replaceChildren();
 
   renderCaseAnchors();
-  window.DAWEI_CASES.forEach((item) => {
+  window.DAWEI_CASES.filter((item) => item.featured !== false).forEach((item) => {
     listRoot.appendChild(createCaseButton(item, "case-list-item"));
   });
+  const addedSchools = window.DAWEI_CASES.filter((item) => item.featured === false && !item.indexType);
+  const otherCases = window.DAWEI_CASES.filter((item) => item.featured === false && item.indexType);
+  if (addedSchools.length) {
+    const heading = document.createElement("h4");
+    heading.className = "case-list-group-heading";
+    heading.textContent = "更多校园案例";
+    listRoot.appendChild(heading);
+    addedSchools.forEach((item) => listRoot.appendChild(createCaseButton(item, "case-list-item")));
+  }
+  if (otherCases.length) {
+    const heading = document.createElement("h4");
+    heading.className = "case-list-group-heading";
+    heading.textContent = "地区专题与赛事";
+    listRoot.appendChild(heading);
+    otherCases.forEach((item) => listRoot.appendChild(createCaseButton(item, "case-list-item")));
+  }
 }
 
 async function loadChinaMap() {
@@ -1102,6 +1118,11 @@ function showCaseDetails(id) {
   resetVideo();
 
   if (item.videoSrc) {
+    if (item.featured === false) {
+      video.poster = `./assets/images/case-thumbnails/${item.id}.jpg`;
+    } else {
+      video.removeAttribute("poster");
+    }
     video.src = item.videoSrc;
     video.controls = true;
     videoPlaceholder.classList.add("is-hidden");

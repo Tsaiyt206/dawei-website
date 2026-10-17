@@ -732,7 +732,9 @@ h1 {
 }
 
 .case-pin[data-city="杭州"] .case-pin-label,
-.case-pin[data-city="广州"] .case-pin-label {
+.case-pin[data-city="广州"] .case-pin-label,
+.case-pin[data-city="合肥"] .case-pin-label,
+.case-pin[data-city="无锡"] .case-pin-label {
   position: absolute;
   right: 20px;
   margin-left: 0;
@@ -1587,12 +1589,19 @@ h1 {
   padding: 22px 28px 24px;
   border: 1px solid rgba(198, 238, 255, 0.7);
   border-radius: 22px;
-  background:
-    linear-gradient(90deg, rgba(4, 60, 163, 0.96), rgba(3, 116, 231, 0.8) 55%, rgba(0, 195, 234, 0.12)),
-    url("./assets/images/league-feature.png") 58% center / cover no-repeat,
-    #0b80e5;
+  background: linear-gradient(90deg, #0648ab, #087de4 58%, #12aeef);
   box-shadow: 0 16px 35px rgba(4, 83, 170, 0.18), inset 0 1px rgba(255, 255, 255, 0.4);
   color: #ffffff;
+}
+
+.league-feature::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: url("./assets/images/跳绳沩沩.png") right center / auto 125% no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent 50%, #000 78%);
+  mask-image: linear-gradient(90deg, transparent 50%, #000 78%);
 }
 
 .league-feature::after {
@@ -1601,6 +1610,14 @@ h1 {
   inset: 0;
   pointer-events: none;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 32%);
+}
+
+@media (max-width: 1200px) {
+  .league-feature::before {
+    background-size: auto 100%;
+    -webkit-mask-image: linear-gradient(90deg, transparent 50%, #000 82%);
+    mask-image: linear-gradient(90deg, transparent 50%, #000 82%);
+  }
 }
 
 .league-feature-copy,
@@ -1621,6 +1638,10 @@ h1 {
   margin: 5px 0 4px;
   font-size: 22px;
   line-height: 1.25;
+}
+
+@media (max-width: 1600px) {
+  .league-feature h3 { font-size: 19px; }
 }
 
 .league-feature-count {
@@ -1733,6 +1754,16 @@ h1 {
   padding: 1px 5px 4px 1px;
   scrollbar-width: thin;
   scrollbar-color: #8cc9e8 transparent;
+}
+
+.case-list-group-heading {
+  flex: none;
+  margin: 8px 2px 1px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(142, 193, 227, 0.45);
+  color: #447a9c;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .case-list button.case-list-item {

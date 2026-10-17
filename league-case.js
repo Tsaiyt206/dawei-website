@@ -283,7 +283,7 @@ function renderLeagueCaseNav() {
   leagueCaseTrack.replaceChildren();
   const entries = [
     { id: "league", number: "01", title: "全国赛事", image: "./assets/images/league-feature.png" },
-    ...window.DAWEI_CASES.map((item) => ({
+    ...window.DAWEI_CASES.filter((item) => item.featured !== false).map((item) => ({
       id: item.id, number: item.number, title: `${item.location} ${item.shortTitle}`,
       image: `./assets/images/case-thumbnails/${item.id}.jpg`,
     })),
