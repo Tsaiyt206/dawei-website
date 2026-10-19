@@ -7,20 +7,10 @@ const leagueSouthSeaSvg = document.querySelector("#leagueSouthSeaSvg");
 const leagueProvinceList = document.querySelector("#leagueProvinces");
 const leagueCaseTrack = document.querySelector("#leagueCaseTrack");
 const leagueZoom = document.querySelector("#leagueZoom");
-const leagueEventVideo = document.querySelector("#leagueEventVideo");
 const coveredRegions = new Set(window.DAWEI_LEAGUE.map(({ region }) => region));
-const leagueView = { x: 0, y: 0, zoom: 1, pointer: null, selectedRegion: null };
+const leagueView = { x: 0, y: 0, zoom: 1, pointer: null };
 const defaultMapTop = () => stage.querySelector(".main-layout").offsetTop;
 let homeScrollY = window.scrollY;
-
-function setLeagueVideoSource(source) {
-  const hasSource = Boolean(source);
-  leagueEventVideo.parentElement.classList.toggle("has-video", hasSource);
-  leagueEventVideo.hidden = !hasSource;
-  if (hasSource) leagueEventVideo.src = source;
-  else leagueEventVideo.removeAttribute("src");
-  leagueEventVideo.load();
-}
 
 function showLeagueScreen() {
   stage.hidden = true;
@@ -136,34 +126,31 @@ function setLeaguePan(x, y) {
 }
 
 function activateLeagueRegion(region) {
-  const activeRegion = region || leagueView.selectedRegion;
   leagueMapSvg.querySelectorAll("[data-region]").forEach((node) => {
-    node.classList.toggle("is-active", node.dataset.region === activeRegion);
+    node.classList.toggle("is-active", node.dataset.region === region);
   });
   leagueProvinceList.querySelectorAll("[data-region]").forEach((node) => {
-    node.classList.toggle("is-active", node.dataset.region === activeRegion);
-    node.setAttribute("aria-pressed", String(node.dataset.region === leagueView.selectedRegion));
+    node.classList.toggle("is-active", node.dataset.region === region);
   });
-}
-
-function selectLeagueRegion(region) {
-  leagueView.selectedRegion = leagueView.selectedRegion === region ? null : region;
-  activateLeagueRegion(null);
 }
 
 function renderLeagueProvinces() {
   leagueProvinceList.replaceChildren();
   window.DAWEI_LEAGUE.forEach(({ region }) => {
-    const chip = document.createElement("button");
-    chip.type = "button";
+    const linkedCase = casesByRegion.get(region);
+    const chip = document.createElement(linkedCase ? "button" : "span");
+    if (linkedCase) chip.type = "button";
     chip.className = "league-province-chip";
     chip.dataset.region = region;
     chip.textContent = region;
+    if (linkedCase) chip.setAttribute("aria-label", `${region}，查看案例${linkedCase.number} ${linkedCase.title}`);
     chip.addEventListener("pointerenter", () => activateLeagueRegion(region));
     chip.addEventListener("pointerleave", () => activateLeagueRegion(null));
-    chip.addEventListener("focus", () => activateLeagueRegion(region));
-    chip.addEventListener("blur", () => activateLeagueRegion(null));
-    chip.addEventListener("click", () => selectLeagueRegion(region));
+    if (linkedCase) {
+      chip.addEventListener("focus", () => activateLeagueRegion(region));
+      chip.addEventListener("blur", () => activateLeagueRegion(null));
+      chip.addEventListener("click", () => openCase(linkedCase.id));
+    }
     leagueProvinceList.appendChild(chip);
   });
 }
@@ -246,19 +233,24 @@ async function renderLeagueMap() {
       if (isLine) boundaries.appendChild(path);
       else {
         if (coveredRegions.has(region)) {
-          path.setAttribute("tabindex", "0");
-          path.setAttribute("aria-label", `${region}，全国赛事参与省份`);
           path.addEventListener("pointerenter", () => activateLeagueRegion(region));
           path.addEventListener("pointerleave", () => activateLeagueRegion(null));
-          path.addEventListener("focus", () => activateLeagueRegion(region));
-          path.addEventListener("blur", () => activateLeagueRegion(null));
-          path.addEventListener("click", () => selectLeagueRegion(region));
-          path.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              selectLeagueRegion(region);
-            }
-          });
+          const linkedCase = casesByRegion.get(region);
+          if (linkedCase) {
+            path.classList.add("has-case");
+            path.setAttribute("tabindex", "0");
+            path.setAttribute("role", "button");
+            path.setAttribute("aria-label", `${region}，查看案例${linkedCase.number} ${linkedCase.title}`);
+            path.addEventListener("focus", () => activateLeagueRegion(region));
+            path.addEventListener("blur", () => activateLeagueRegion(null));
+            path.addEventListener("click", () => openCase(linkedCase.id));
+            path.addEventListener("keydown", (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openCase(linkedCase.id);
+              }
+            });
+          }
         }
         regions.appendChild(path);
       }
@@ -283,7 +275,7 @@ function renderLeagueCaseNav() {
   leagueCaseTrack.replaceChildren();
   const entries = [
     { id: "league", number: "01", title: "全国赛事", image: "./assets/images/league-feature.png" },
-    ...window.DAWEI_CASES.map((item) => ({
+    ...[...window.DAWEI_CASES].sort((a, b) => Number(a.number) - Number(b.number)).map((item) => ({
       id: item.id, number: item.number, title: `${item.location} ${item.shortTitle}`,
       image: `./assets/images/case-thumbnails/${item.id}.jpg`,
     })),
@@ -312,19 +304,26 @@ function renderLeagueCaseNav() {
 }
 
 leagueToggle.addEventListener("click", navigateToLeague);
-document.querySelector("#leagueCountEntry").addEventListener("click", navigateToLeague);
+document.querySelector("#leagueProvinceEntry").addEventListener("click", () => {
+  leagueProvinceList.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  leagueProvinceList.focus({ preventScroll: true });
+});
 leagueBack.addEventListener("click", navigateBackToHome);
 leagueZoom.addEventListener("input", (event) => setLeagueZoom(event.target.value));
 document.querySelector("#leagueZoomOut").addEventListener("click", () => setLeagueZoom(leagueView.zoom / 1.15));
 document.querySelector("#leagueZoomIn").addEventListener("click", () => setLeagueZoom(leagueView.zoom * 1.15));
 leagueMapViewport.addEventListener("pointerdown", (event) => {
   if (event.button !== 0 || event.target.closest(".league-map-controls, .league-south-sea")) return;
-  leagueView.pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: leagueView.x, originY: leagueView.y };
-  leagueMapViewport.setPointerCapture(event.pointerId);
-  leagueMapViewport.classList.add("is-dragging");
+  leagueView.pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: leagueView.x, originY: leagueView.y, dragging: false };
 });
 leagueMapViewport.addEventListener("pointermove", (event) => {
   if (!leagueView.pointer || event.pointerId !== leagueView.pointer.id) return;
+  if (!leagueView.pointer.dragging) {
+    if (Math.hypot(event.clientX - leagueView.pointer.x, event.clientY - leagueView.pointer.y) < 6) return;
+    leagueView.pointer.dragging = true;
+    leagueMapViewport.setPointerCapture(event.pointerId);
+    leagueMapViewport.classList.add("is-dragging");
+  }
   setLeaguePan(leagueView.pointer.originX + event.clientX - leagueView.pointer.x,
     leagueView.pointer.originY + event.clientY - leagueView.pointer.y);
 });

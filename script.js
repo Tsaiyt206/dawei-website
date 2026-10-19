@@ -830,7 +830,8 @@ function createCaseButton(item, className) {
   button.setAttribute("aria-label", `查看${item.location}：${item.title}`);
 
   thumbnail.className = "case-list-thumbnail";
-  thumbnail.src = `./assets/images/case-thumbnails/${item.id}.jpg`;
+  thumbnail.src = item.thumbnail || `./assets/images/case-thumbnails/${item.id}.jpg`;
+  if (item.id === "league") thumbnail.classList.add("case-list-thumbnail-league");
   thumbnail.alt = "";
   thumbnail.loading = "lazy";
   copy.className = "case-list-copy";
@@ -840,7 +841,7 @@ function createCaseButton(item, className) {
   location.className = "case-list-location";
   location.textContent = item.location;
   school.className = "case-list-school";
-  school.textContent = item.shortTitle;
+  school.textContent = item.indexType ? `${item.indexType} · ${item.shortTitle}` : item.shortTitle;
   arrow.className = "case-list-arrow";
   arrow.textContent = "→";
   arrow.setAttribute("aria-hidden", "true");
@@ -848,7 +849,8 @@ function createCaseButton(item, className) {
   copy.append(heading, school);
   button.append(thumbnail, copy, arrow);
 
-  bindCaseMarkerInteraction(button, item);
+  if (item.id === "league") button.addEventListener("click", navigateToLeague);
+  else bindCaseMarkerInteraction(button, item);
   return button;
 }
 
@@ -933,9 +935,25 @@ function renderCases() {
   casePinsRoot.replaceChildren();
 
   renderCaseAnchors();
-  window.DAWEI_CASES.forEach((item) => {
-    listRoot.appendChild(createCaseButton(item, "case-list-item"));
-  });
+  listRoot.appendChild(createCaseButton({
+    id: "league", number: "01", location: "全国赛事",
+    shortTitle: "全国校园AI跳绳公益挑战赛", title: "全国校园AI跳绳公益挑战赛",
+    thumbnail: "./assets/images/跳绳沩沩.png",
+  }, "case-list-item"));
+  let previousGroup = null;
+  [...window.DAWEI_CASES]
+    .sort((a, b) => Number(a.number) - Number(b.number))
+    .forEach((item) => {
+      const group = item.featured !== false ? null : item.indexType ? "地区专题与赛事" : "更多校园案例";
+      if (group && group !== previousGroup) {
+        const heading = document.createElement("h4");
+        heading.className = "case-list-group-heading";
+        heading.textContent = group;
+        listRoot.appendChild(heading);
+      }
+      listRoot.appendChild(createCaseButton(item, "case-list-item"));
+      previousGroup = group;
+    });
 }
 
 async function loadChinaMap() {
@@ -1102,6 +1120,11 @@ function showCaseDetails(id) {
   resetVideo();
 
   if (item.videoSrc) {
+    if (item.featured === false) {
+      video.poster = `./assets/images/case-thumbnails/${item.id}.jpg`;
+    } else {
+      video.removeAttribute("poster");
+    }
     video.src = item.videoSrc;
     video.controls = true;
     videoPlaceholder.classList.add("is-hidden");

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>大沩校园案例交互展示</title>
+    <link rel="preload" as="image" href="./assets/images/沩沩眨眼首帧.png" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./league-case.css" />
   </head>
@@ -21,8 +22,10 @@
             class="cover-blink-video"
             id="coverBlinkVideo"
             src="./assets/videos/沩沩眨眼动画.mp4"
+            poster="./assets/images/沩沩眨眼首帧.png"
             preload="auto"
             playsinline
+            webkit-playsinline
             muted
             aria-label="大沩首页封面"
           ></video>
@@ -37,7 +40,7 @@
         <div class="main-layout">
           <section class="map-stage" aria-label="中国地图案例选择">
             <div class="map-toolbar">
-              <p class="map-eyebrow">CHINA CAMPUS MAP</p>
+              <p class="map-eyebrow">FEATURED CASES</p>
               <h2>让AI公益，点亮每一座校园</h2>
               <p class="map-intro">点击地图，探索全国校园实践</p>
             </div>
@@ -104,7 +107,7 @@
                     <p>全国校园 AI 跳绳公益联赛</p>
                     <strong>23 个省份</strong>
                     <span id="leagueSelection">全国学校分布</span>
-                    <button class="league-video-button" id="leagueVideoButton" type="button">观看联赛视频</button>
+                    <button class="league-video-button" id="leagueVideoButton" type="button">查看全国案例</button>
                   </div>
                   <div class="league-count-list" id="leagueCountList"></div>
                 </aside>
@@ -113,22 +116,37 @@
           </section>
 
           <aside class="map-sidebar" aria-label="全国赛事与案例索引">
-            <section class="league-feature" aria-labelledby="leagueFeatureTitle" data-case-id="league">
+            <section class="league-feature global-feature" aria-labelledby="leagueFeatureTitle">
+              <img class="global-feature-image" src="./assets/images/league-feature.png" alt="" />
               <div class="league-feature-copy">
-                <span class="league-feature-number">01</span>
-                <h3 id="leagueFeatureTitle">全国校园AI跳绳公益挑战赛</h3>
-                <button class="league-feature-count" id="leagueCountEntry" type="button" aria-controls="leagueScreen" aria-label="探索全国赛事覆盖的23个省份"><strong>23</strong><span>个省份</span></button>
-                <p class="league-feature-description">跳跃吧，大沩英气少年</p>
+                <h3 id="leagueFeatureTitle">全球布局</h3>
+                <div class="global-feature-primary">
+                  <span>业务层面</span>
+                  <p><strong>34</strong><span>个省级行政区</span></p>
+                  <small>（辐射至马来西亚、新加坡等地区）</small>
+                </div>
+                <div class="global-feature-secondary">
+                  <div>
+                    <span>服务城市</span>
+                    <p><em>超</em><strong>300</strong><em>座</em></p>
+                    <small>服务案例超15000所学校</small>
+                  </div>
+                  <div>
+                    <span>累计使用</span>
+                    <p><em>超</em><strong>29.4</strong><em>亿</em></p>
+                    <small>运动人次</small>
+                  </div>
+                </div>
               </div>
               <button class="league-entry" id="leagueToggle" type="button" data-case-id="league" aria-controls="leagueScreen">
-                点亮全国 <span aria-hidden="true">→</span>
+                查看全国案例 01 <span aria-hidden="true">→</span>
               </button>
             </section>
 
             <section class="case-list" aria-label="案例列表">
               <div class="case-list-heading">
                 <h3><span>CASE INDEX</span> 案例索引</h3>
-                <span>02—10</span>
+                <span>01—21</span>
               </div>
               <div id="caseList"></div>
             </section>
@@ -172,25 +190,29 @@
               <span>01</span>
               <h1 id="leagueScreenTitle">全国校园AI跳绳公益挑战赛</h1>
             </div>
-            <p class="league-detail-description">联赛覆盖 23 个省份，汇集校园跳绳活动与公益赛事成果。</p>
-            <div class="league-detail-count"><strong>23</strong><span>个省份</span></div>
-            <div class="league-video-pending" role="group" aria-label="赛事视频待嵌入">
-              <span class="league-video-play" aria-hidden="true">▶</span>
-              <strong>视频待嵌入</strong>
-              <video id="leagueEventVideo" controls playsinline preload="metadata" hidden></video>
-            </div>
+            <section class="league-feature league-detail-feature" aria-label="全国赛事重点信息">
+              <div class="league-feature-copy">
+                <h3>联赛覆盖</h3>
+                <div class="league-feature-count"><strong>23</strong><span>个省份</span></div>
+                <p class="league-feature-description">跳跃吧，大沩英气少年</p>
+                <p class="league-feature-support">汇集校园跳绳活动与公益赛事成果。</p>
+              </div>
+              <button class="league-entry" id="leagueProvinceEntry" type="button" aria-controls="leagueProvinces">
+                点亮全国 <span aria-hidden="true">→</span>
+              </button>
+            </section>
             <div class="league-provinces-heading">
               <h2>参与省份</h2><span>23 PROVINCES</span>
             </div>
-            <div class="league-provinces" id="leagueProvinces" aria-label="23个参与省份"></div>
+            <div class="league-provinces" id="leagueProvinces" aria-label="23个参与省份" tabindex="-1"></div>
           </aside>
         </div>
 
-        <nav class="league-case-nav" aria-label="01至10案例导航">
+        <nav class="league-case-nav" aria-label="01至21案例导航">
           <div class="league-case-nav-heading"><strong>案例导航</strong><span>CASE INDEX</span></div>
-          <button class="league-nav-arrow" id="leagueNavPrev" type="button" aria-label="向左浏览案例" title="向左浏览案例">‹</button>
+          <button class="league-nav-arrow" id="leagueNavPrev" type="button" aria-label="向左浏览案例" title="向左浏览案例"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg></button>
           <div class="league-case-track" id="leagueCaseTrack"></div>
-          <button class="league-nav-arrow" id="leagueNavNext" type="button" aria-label="向右浏览案例" title="向右浏览案例">›</button>
+          <button class="league-nav-arrow" id="leagueNavNext" type="button" aria-label="向右浏览案例" title="向右浏览案例"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg></button>
         </nav>
       </section>
 
