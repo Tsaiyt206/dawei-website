@@ -172,9 +172,8 @@ h1 {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 92%);
 }
 
-.cover-blink-video {
+.cover-blink-poster {
   position: relative;
-  z-index: 1;
   display: block;
   width: 100%;
   height: auto;
@@ -182,11 +181,18 @@ h1 {
   pointer-events: none;
 }
 
-.cover-blink-video::-webkit-media-controls,
-.cover-blink-video::-webkit-media-controls-enclosure,
-.cover-blink-video::-webkit-media-controls-panel {
-  display: none !important;
+.cover-blink-canvas {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
 }
+
+.cover-blink-canvas.is-playing { opacity: 1; }
 
 .cover-blink-trigger {
   position: absolute;
