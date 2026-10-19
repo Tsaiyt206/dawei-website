@@ -285,6 +285,17 @@
   line-height: 1.4;
 }
 
+.league-showcase-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 967 / 544;
+  height: auto;
+  margin: 14px 0 0;
+  border-radius: 12px;
+  background: #103b70;
+  object-fit: contain;
+}
+
 .league-provinces-heading { display: flex; justify-content: space-between; align-items: baseline; margin: 15px 1px 8px; }
 .league-provinces-heading h2 { margin: 0; color: #194b88; font-size: 16px; }
 .league-provinces-heading span { color: #5e8ab2; font-size: 11px; font-weight: 700; }

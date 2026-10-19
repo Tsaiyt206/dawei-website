@@ -5,6 +5,7 @@ const leagueMapTransform = document.querySelector("#leagueMapTransform");
 const leagueMapSvg = document.querySelector("#leagueMapSvg");
 const leagueSouthSeaSvg = document.querySelector("#leagueSouthSeaSvg");
 const leagueProvinceList = document.querySelector("#leagueProvinces");
+const leagueShowcaseVideo = document.querySelector("#leagueShowcaseVideo");
 const leagueCaseTrack = document.querySelector("#leagueCaseTrack");
 const leagueZoom = document.querySelector("#leagueZoom");
 const coveredRegions = new Set(window.DAWEI_LEAGUE.map(({ region }) => region));
@@ -51,6 +52,7 @@ function rememberHomeScroll() {
 
 function renderRoute({ initial = false, focus = false } = {}) {
   const route = currentRoute();
+  if (route.view !== "league") leagueShowcaseVideo.pause();
   homeScrollY = Number.isFinite(route.homeScrollY) ? route.homeScrollY : defaultMapTop();
   hideCaseDetails();
 
