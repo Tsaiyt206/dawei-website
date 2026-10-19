@@ -134,7 +134,9 @@
 
     function updateObstruction() {
       const { w, h } = dims();
-      const obstructed = innerWidth < 900 && [".case-list", ".league-case-nav"].some((selector) => {
+      const selectors = [".league-showcase-video"];
+      if (innerWidth < 900) selectors.push(".case-list", ".league-case-nav");
+      const obstructed = selectors.some((selector) => {
         const bounds = document.querySelector(selector)?.getBoundingClientRect();
         return bounds && bounds.width && bounds.height &&
           x + w * .8 > bounds.left && x + w * .2 < bounds.right &&
