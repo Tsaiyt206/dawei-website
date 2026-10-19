@@ -18,17 +18,12 @@
             </div>
           </header>
           <h1 id="page-title" class="sr-only">全国校园案例交互展示</h1>
-          <video
-            class="cover-blink-video"
-            id="coverBlinkVideo"
-            src="./assets/videos/沩沩眨眼动画.mp4"
-            poster="./assets/images/沩沩眨眼首帧.png"
-            preload="auto"
-            playsinline
-            webkit-playsinline
-            muted
-            aria-label="大沩首页封面"
-          ></video>
+          <img
+            class="cover-blink-poster"
+            src="./assets/images/沩沩眨眼首帧.png"
+            alt="大沩首页封面"
+          />
+          <canvas class="cover-blink-canvas" id="coverBlinkCanvas" width="1280" height="528" aria-hidden="true"></canvas>
           <button
             class="cover-blink-trigger"
             id="coverBlinkTrigger"

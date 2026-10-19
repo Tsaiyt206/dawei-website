@@ -80,7 +80,7 @@ const caseTitle = document.querySelector("#caseTitle");
 const caseDescription = document.querySelector("#caseDescription");
 const caseFacts = document.querySelector("#caseFacts");
 const coverBlinkTrigger = document.querySelector("#coverBlinkTrigger");
-const coverBlinkVideo = document.querySelector("#coverBlinkVideo");
+const coverBlinkCanvas = document.querySelector("#coverBlinkCanvas");
 
 function createSvgElement(name, attributes = {}) {
   const element = document.createElementNS(SVG_NS, name);
@@ -1181,22 +1181,47 @@ document.addEventListener("click", (event) => {
 });
 
 let coverBlinkPlaying = false;
+const coverBlinkSprite = new Image();
+coverBlinkSprite.src = "./assets/images/沩沩眨眼逐帧.webp";
 
 coverBlinkTrigger.addEventListener("click", async () => {
   if (coverBlinkPlaying) return;
 
   coverBlinkPlaying = true;
-  coverBlinkVideo.currentTime = 0;
   try {
-    await coverBlinkVideo.play();
+    await coverBlinkSprite.decode();
   } catch {
     coverBlinkPlaying = false;
+    return;
   }
-});
 
-coverBlinkVideo.addEventListener("ended", () => {
-  coverBlinkVideo.currentTime = 0;
-  coverBlinkPlaying = false;
+  const context = coverBlinkCanvas.getContext("2d");
+  const frameWidth = coverBlinkCanvas.width;
+  const frameHeight = coverBlinkCanvas.height;
+  const frameDuration = 1400 / 19;
+  let startTime;
+
+  function drawFrame(now) {
+    if (startTime === undefined) startTime = now;
+    const elapsed = now - startTime;
+    if (elapsed >= 1400) {
+      coverBlinkCanvas.classList.remove("is-playing");
+      coverBlinkPlaying = false;
+      return;
+    }
+
+    const frame = Math.min(18, Math.floor(elapsed / frameDuration));
+    context.drawImage(
+      coverBlinkSprite,
+      (frame % 5) * frameWidth, Math.floor(frame / 5) * frameHeight,
+      frameWidth, frameHeight,
+      0, 0, frameWidth, frameHeight,
+    );
+    coverBlinkCanvas.classList.add("is-playing");
+    requestAnimationFrame(drawFrame);
+  }
+
+  requestAnimationFrame(drawFrame);
 });
 
 mapZoom.addEventListener("input", (event) => {
