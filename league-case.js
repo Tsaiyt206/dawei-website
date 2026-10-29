@@ -84,6 +84,13 @@ function navigateToLeague() {
   renderRoute({ focus: true });
 }
 
+function navigateToHomeTop() {
+  if (currentRoute().view !== "league") return;
+  homeScrollY = 0;
+  history.pushState({ dawei: true, view: "home", homeScrollY, inAppBack: true }, "", `${location.pathname}${location.search}`);
+  renderRoute();
+}
+
 function navigateToCase(id) {
   if (!window.DAWEI_CASES.some((item) => item.id === id)) return;
   rememberHomeScroll();
@@ -306,10 +313,7 @@ function renderLeagueCaseNav() {
 }
 
 leagueToggle.addEventListener("click", navigateToLeague);
-document.querySelector("#leagueProvinceEntry").addEventListener("click", () => {
-  leagueProvinceList.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  leagueProvinceList.focus({ preventScroll: true });
-});
+document.querySelector("#leagueProvinceEntry").addEventListener("click", navigateToHomeTop);
 leagueBack.addEventListener("click", navigateBackToHome);
 leagueZoom.addEventListener("input", (event) => setLeagueZoom(event.target.value));
 document.querySelector("#leagueZoomOut").addEventListener("click", () => setLeagueZoom(leagueView.zoom / 1.15));

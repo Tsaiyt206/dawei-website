@@ -253,7 +253,7 @@
   color: #124a9b;
   font-size: 27px;
   line-height: 1.25;
-  white-space: normal;
+  white-space: nowrap;
   text-shadow: none;
 }
 .league-detail-feature {
@@ -423,4 +423,18 @@
   .league-nav-arrow { width: 24px; height: 24px; }
   .league-nav-arrow svg { width: 14px; height: 14px; }
   .league-case-card { width: 150px; height: 105px; }
+}
+
+@media (max-width: 480px) {
+  .league-detail-title { gap: 8px; }
+  .league-detail-title span { padding: 4px 7px; font-size: 18px; }
+  .league-detail-title h1 { font-size: 21px; }
+}
+
+@media (max-width: 370px) {
+  .league-detail-title h1 { font-size: 19px; }
+}
+
+@media (max-width: 350px) {
+  .league-detail-title h1 { font-size: 16px; }
 }
